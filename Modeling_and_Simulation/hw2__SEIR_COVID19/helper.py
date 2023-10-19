@@ -38,11 +38,13 @@ class Covid19_wh:
     @staticmethod
     def import_inout_data(start:str='2019/12/27', end:str='2020/1/23'):
         df = Covid19_wh.inout_data.copy()
-        df['Date'] = pd.to_datetime(df['Date'])
+        df['increased'] = df['Inflow']-df['Outflow']
+        df = df.rename(columns={'Date': 'date'})
+        df['date'] = pd.to_datetime(df['date'])
         start = pd.to_datetime(start)
         end = pd.to_datetime(end)
-        df = df[(df['Date'] >= start) & (df['Date'] <= end)]
-        df.set_index('Date', inplace=True)
+        df = df[(df['date'] >= start) & (df['date'] <= end)]
+        df.set_index('date', inplace=True)
         return df
     
     @staticmethod
@@ -54,7 +56,15 @@ class Covid19_wh:
         df = Covid19_wh.import_overall_data()
         sns.lineplot(data=df)
         plt.axvline(x=pd.to_datetime('2020/1/23'), linestyle='--', color='blue')
-        plt.savefig('tmp.png')
+        plt.savefig('data.png')
         plt.clf()
     
-#print(Covid19_wh.import_overall_data())
+    @staticmethod
+    def draw_inout_data():
+        df = Covid19_wh.import_inout_data()
+        sns.lineplot(data=df)
+        plt.savefig('data_inout.png')
+        plt.clf()
+    
+Covid19_wh.draw_inout_data()
+Covid19_wh.draw_data()

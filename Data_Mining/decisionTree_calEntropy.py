@@ -9,12 +9,12 @@ Returns:
     labels - 分类属性
 """
 def createDataSet():
-    labels = 1
+    labels = 3
     dataSet = ( [['Ar', 'G', 'O', 'G'] for i in range(50)]+
-                [['Ar', 'G', 'O', 'E'] for i in range(50)]+
-                [['Ar', 'U', 'Y', 'G'] for i in range(100)]+
-                [['Ap', 'U', 'Y', 'E'] for i in range(150)]+
-                [['S',  'U', 'Y', 'G'] for i in range(150)]
+                [['Ar', 'G', 'O', 'E'] for i in range(150)]+
+                [['Ar', 'U', 'Y', 'G'] for i in range(150)]+
+                [['Ap', 'U', 'Y', 'E'] for i in range(50)]+
+                [['S',  'U', 'Y', 'G'] for i in range(100)]
               )
     for row in dataSet:
         row[labels], row[-1] = row[-1], row[labels]
@@ -81,8 +81,8 @@ def chooseBestFeatureToSplit(dataSet):
             prob = len(subDataSet) / float(len(dataSet))           #计算子集的概率
             newEntropy += prob * calcShannonEnt(subDataSet)     #根据公式计算经验条件熵
         infoGain = baseEntropy - newEntropy                     #信息增益
-        print("第%d个特征的增益为%.5f" % (i, infoGain), 
-              ", 经验条件熵为%.5f" % (newEntropy))            #打印每个特征的信息增益
+        print("第%d个特征的增益为%.6f" % (i, infoGain), 
+              ", 经验条件熵为%.6f" % (newEntropy))            #打印每个特征的信息增益
         if (infoGain > bestInfoGain):                             #计算信息增益
             bestInfoGain = infoGain                             #更新信息增益，找到最大的信息增益
             bestFeature = i                                     #记录信息增益最大的特征的索引值

@@ -2,12 +2,12 @@
 # coding=utf-8
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from scipy.integrate import solve_ivp
 from scipy.optimize import leastsq
 from scipy.optimize import curve_fit
 from sklearn.utils.validation import check_is_fitted, check_array
 from sko.GA import GA
-import pandas as pd
 
 from helper import Covid19_wh
 
@@ -159,6 +159,21 @@ def MSE(y, yhat):
     yhat = check_array(yhat, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
     return ((y-yhat)**2).sum()/y.size
 
+def RMSE(y, yhat):
+    y = check_array(y, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    yhat = check_array(yhat, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    return np.sqrt(((y-yhat)**2).sum()/y.size)
+
+def MAE(y, yhat):
+    y = check_array(y, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    yhat = check_array(yhat, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    return (np.abs(y-yhat)).sum()/y.size
+
+def R2(y, yhat):
+    y = check_array(y, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    yhat = check_array(yhat, accept_sparse=False, dtype=np.float64, force_all_finite='allow-nan', ensure_2d=False)
+    return 1-(((y-yhat)**2).sum()/y.size)/np.var(y)
+
 period = [
     ['2019/12/27', '2020/1/23'],
     ['2020/1/23', '2020/2/11'],
@@ -231,6 +246,8 @@ if __name__ == "__main__":
         para = Covid19_wh.import_para()                                 # 拟合后参数
         model = SEIQRD(x, para, method='varypara', inout=inout)
         model.vary_run(len(y)-1, 1)
+        df = pd.DataFrame(np.array([model.S, model.E, model.I, model.Q, model.R, model.D]).T, columns=['S', 'Q', 'I', 'Q', 'R', 'D'])
+        df.to_csv('data/output.csv', index=False)
 
     t = np.linspace(1,len(y),len(y))
     print(f'S:{model.S[-1]}, E:{model.E[-1]}, I:{model.I[-1]}, Q:{model.Q[-1]}, R:{model.R[-1]}, D:{model.D[-1]}')
@@ -240,14 +257,23 @@ if __name__ == "__main__":
     plt.plot(t, model.R, label='R')
     plt.plot(t, model.D, label='D')
     plt.plot(t, np.array(model.Q)+np.array(model.I), label='C')
-    plt.plot(t, y['confirmed_now'], label='tC')
-    plt.plot(t, y['cured'], label='tR')
-    plt.plot(t, y['dead'], label='tD')
+    plt.plot(t, y['confirmed_now'], linestyle='--', label='tC')
+    plt.plot(t, y['cured'], linestyle='-.', label='tR')
+    plt.plot(t, y['dead'], linestyle=':', label='tD')
     plt.legend(loc='best')
     plt.savefig(f'tmp.png')
     plt.clf()
 
-    loss = (MSE(model.D, y['dead'])
+    mse = (MSE(model.D, y['dead'])
             +MSE(np.array(model.I)+np.array(model.Q), y['confirmed_now'])
             +MSE(model.R, y['cured']))/3
-    print(loss)
+    mae = (MAE(model.D, y['dead'])
+            +MAE(np.array(model.I)+np.array(model.Q), y['confirmed_now'])
+            +MAE(model.R, y['cured']))/3
+    rmse = (RMSE(model.D, y['dead'])
+            +RMSE(np.array(model.I)+np.array(model.Q), y['confirmed_now'])
+            +RMSE(model.R, y['cured']))/3
+    r2 = (R2(model.D, y['dead'])
+            +R2(np.array(model.I)+np.array(model.Q), y['confirmed_now'])
+            +R2(model.R, y['cured']))/3
+    print(f'MSE:{mse}, MRSE:{rmse}, MAE:{mae}, R2:{r2}')

@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 # coding=utf-8
+'''
+使用教程：
+1. 更改数据集(dataSet)
+2. 更改目标属性(labels, 编号从0开始)
+3. 命令行运行 `python decisionTree_calEntropy.py`
+
+*注意：最终输出的列的顺序是目标列与最后一列交换后的顺序，而不是去掉目标列的顺序
+    - 如[0,1,2,3]列，目标列为列1，则新的顺序为[0,3,2,1]，原来的第2、3列的顺序反了
+'''
+
+
 from math import log
 """
 Parameters:
@@ -9,13 +20,17 @@ Returns:
     labels - 分类属性
 """
 def createDataSet():
-    labels = 3
+    #################### dataSet改成你的dataSet数据，labels为所选目标类 ########################
+    labels = 0
     dataSet = ( [['Ar', 'G', 'O', 'G'] for i in range(50)]+
-                [['Ar', 'G', 'O', 'E'] for i in range(150)]+
-                [['Ar', 'U', 'Y', 'G'] for i in range(150)]+
-                [['Ap', 'U', 'Y', 'E'] for i in range(50)]+
-                [['S',  'U', 'Y', 'G'] for i in range(100)]
+                [['Ar', 'G', 'O', 'E'] for i in range(50)]+
+                [['Ar', 'U', 'Y', 'G'] for i in range(100)]+
+                [['Ap', 'G', 'Y', 'E'] for i in range(150)]+
+                [['Ap', 'U', 'Y', 'G'] for i in range(100)]+
+                [['S',  'G', 'O', 'G'] for i in range(200)]+
+                [['S',  'U', 'Y', 'G'] for i in range(150)]
               )
+    ############################################################################################
     for row in dataSet:
         row[labels], row[-1] = row[-1], row[labels]
     return dataSet                #返回数据集和分类属性
